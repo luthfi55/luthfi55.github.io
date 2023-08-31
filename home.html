@@ -1,0 +1,163 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Home</title>
+    <link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/4.5.2/css/bootstrap.min.css">
+</head>
+<body class="bg-light">
+    <div class="container mt-5">
+        <div class="row justify-content-center">
+            <div class="col-md-6">
+                <div class="card">
+                    <div class="card-header bg-white text-center">
+                        <h4>Welcome to the Dashboard</h4>
+                    </div>
+                    <div class="card-body">
+                        <p class="text-center">You have successfully logged in as <span id="username"></span>!</p>
+                    </div>
+                </div>
+
+                <!-- Create Room Button -->
+                <div class="mt-3 text-center">
+                    <button type="button" class="btn btn-dark" data-toggle="modal" data-target="#createRoomModal">
+                        Create Room
+                    </button>
+                </div>
+
+                <!-- Card for displaying API data -->
+                <div class="card mt-4">
+                    <div class="card-header">
+                        Rooms List
+                    </div>
+                    <div class="card-body">
+                        <ul id="roomsList" class="list-group">
+                            <!-- Rooms data will be displayed here -->
+                        </ul>
+                    </div>
+                </div>
+                
+            </div>
+        </div>
+    </div>
+
+    <!-- Logout Button -->
+    <div class="container mt-3 text-center">
+        <a href="login.html" class="btn btn-dark">Logout</a>
+    </div>
+
+    <!-- Create Room Modal -->
+    <div class="modal fade" id="createRoomModal" tabindex="-1" role="dialog" aria-labelledby="createRoomModalLabel" aria-hidden="true">
+        <div class="modal-dialog" role="document">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h5 class="modal-title" id="createRoomModalLabel">Create Room</h5>
+                    <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+                        <span aria-hidden="true">&times;</span>
+                    </button>
+                </div>
+                <div class="modal-body">
+                    <form id="createRoomForm">
+                        <div class="form-group">
+                            <label for="roomId">Room ID</label>
+                            <input type="text" class="form-control" id="roomId" placeholder="Enter Room ID" required>
+                        </div>
+                        <div class="form-group">
+                            <label for="roomName">Room Name</label>
+                            <input type="text" class="form-control" id="roomName" placeholder="Enter Room Name" required>
+                        </div>
+                        <button type="submit" class="btn btn-dark">Create</button>
+                    </form>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        const usernameSpan = document.getElementById("username");
+
+        const urlParams = new URLSearchParams(window.location.search);
+        const encodedData = urlParams.get("data");
+        const responseData = JSON.parse(encodedData);
+        const username = responseData.username;
+        usernameSpan.textContent = username;
+
+        // Fetch and display rooms data
+        function fetchRooms() {
+            fetch('https://realtime-chat-production-e31d.up.railway.app/ws/getRooms')
+                .then(response => response.json())
+                .then(data => {
+                    const roomsList = document.getElementById('roomsList');
+                    roomsList.innerHTML = ''; // Clear the previous list
+
+                    data.forEach(room => {
+                        const listItem = document.createElement('li');
+                        listItem.className = 'list-group-item d-flex justify-content-between align-items-center';
+                        listItem.textContent = `Room ID: ${room.id}, Name: ${room.name}`;
+
+                        // Create "Join" button
+                        const joinButton = document.createElement('button');
+                        joinButton.className = 'btn btn-dark';
+                        joinButton.textContent = 'Join';
+                        listItem.appendChild(joinButton);
+
+                        // Attach click event handler to the "Join" button
+                        joinButton.addEventListener('click', () => {
+                            // Construct WebSocket URL
+                            const roomchatURL = `ws://realtime-chat-production-e31d.up.railway.app/ws/joinRoom/${room.id}?userId=${responseData.id}&username=${responseData.username}`;
+                            const socket = new WebSocket(roomchatURL);
+                            // console.log(socket);
+                            // const roomchatParams = `?room=${encodeURIComponent(room.id)}&userId=${encodeURIComponent(responseData.id)}&username=${encodeURIComponent(responseData.username)}`;
+                            // window.location.href = `roomchat.html${roomchatParams}`;
+
+                            // Redirect to roomchat.html
+                            window.location.href = `roomchat.html?roomchat=${encodeURIComponent(roomchatURL)}`;
+                        });
+
+                        roomsList.appendChild(listItem);
+                    });
+                })
+                .catch(error => {
+                    console.error('Error fetching rooms:', error);
+                });
+        }
+
+        // Submit event listener for create room form
+        document.getElementById('createRoomForm').addEventListener('submit', function(event) {
+            event.preventDefault();
+
+            const roomId = document.getElementById('roomId').value;
+            const roomName = document.getElementById('roomName').value;
+            const data = {
+                id: roomId,
+                name: roomName
+            };
+
+            // Create Room using API
+            fetch('https://realtime-chat-production-e31d.up.railway.app/ws/createRoom', {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json'
+                },
+                body: JSON.stringify(data)
+            })
+            .then(response => response.json())
+            .then(responseData => {
+                console.log('Room created successfully:', responseData);
+                $('#createRoomModal').modal('hide'); // Hide the modal
+                fetchRooms(); // Refresh the rooms list
+            })
+            .catch(error => {
+                console.error('Error creating room:', error);
+            });
+        });
+
+        // Fetch rooms data on page load
+        fetchRooms();
+    </script>
+
+    <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
+    <script src="https://maxcdn.bootstrapcdn.com/bootstrap/4.5.2/js/bootstrap.min.js"></script>
+</body>
+</html>
