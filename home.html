@@ -105,7 +105,7 @@
                         // Attach click event handler to the "Join" button
                         joinButton.addEventListener('click', () => {
                             // Construct WebSocket URL
-                            const roomchatURL = `ws://realtime-chat-production-e31d.up.railway.app/ws/joinRoom/${room.id}?userId=${responseData.id}&username=${responseData.username}`;
+                            const roomchatURL = `wss://realtime-chat-production-e31d.up.railway.app/ws/joinRoom/${room.id}?userId=${responseData.id}&username=${responseData.username}`;
                             const socket = new WebSocket(roomchatURL);
                             // console.log(socket);
                             // const roomchatParams = `?room=${encodeURIComponent(room.id)}&userId=${encodeURIComponent(responseData.id)}&username=${encodeURIComponent(responseData.username)}`;
