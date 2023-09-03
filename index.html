@@ -1,12 +1,14 @@
 <!DOCTYPE html>
 <html lang="en">
-<head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Login</title>
-    <link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/4.5.2/css/bootstrap.min.css">
-    <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
-</head>
+    <head>
+        <meta charset="UTF-8">
+        <meta name="viewport" content="width=device-width, initial-scale=1.0">
+        <title>Login</title>
+        <link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/4.5.2/css/bootstrap.min.css">            
+        <script src="https://maxcdn.bootstrapcdn.com/bootstrap/4.5.2/js/bootstrap.min.js"></script>
+        <script type="text/JavaScript" src="js/login.js"></script> <!-- Jika ada file JavaScript kustom -->
+        <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
+    </head>
 <body class="bg-light">
     <div class="container mt-5">
         <div class="row justify-content-center">
@@ -14,6 +16,9 @@
                 <div class="card">
                     <div class="card-header bg-white text-center">
                         <h4>Login</h4>
+                    </div>
+                    <div class="alert alert-danger " role="alert" id="errorAlert" style="display: none;">
+                        <!-- Pesan error akan ditampilkan di sini -->                        
                     </div>
                     <div class="card-body">
                         <form id="loginForm">
@@ -25,45 +30,22 @@
                                 <label for="password">Password</label>
                                 <input type="password" class="form-control" id="password" placeholder="Password">
                             </div>
-                            <button type="submit" class="btn btn-dark btn-block">Login</button>
+                            <button type="button" class="btn btn-dark btn-block" onclick="login()">Login</button>
+                            <!-- <button type="submit" class="btn btn-dark btn-block">Login</button> -->
                         </form>
-                        <a href="register.html"><button style="margin-top: 10px;" class="btn btn-secondary btn-block">Register</button></a>
+                        <!-- <a href="register.html"><button style="margin-top: 10px;" class="btn btn-secondary btn-block">Register</button></a> -->
+                        <button style="margin-top: 10px;" class="btn btn-secondary btn-block" onclick="navigateToRegister()">Register</button>
                     </div>
                 </div>
             </div>
         </div>
     </div>
 
-    <script src="https://cdn.jsdelivr.net/npm/@popperjs/core@2.11.6/dist/umd/popper.min.js"></script>
-    <script src="https://maxcdn.bootstrapcdn.com/bootstrap/4.5.2/js/bootstrap.min.js"></script>
-    <script>
-        $(document).ready(function () {
-            $("#loginForm").submit(function (event) {
-                event.preventDefault();
-                
-                const email = $("#email").val();
-                const password = $("#password").val();
-                const data = {
-                    email: email,
-                    password: password
-                };
-    
-                $.ajax({
-                    type: "POST",
-                    url: "https://realtime-chat-production-e31d.up.railway.app/users/v1/login",
-                    data: JSON.stringify(data),
-                    contentType: "application/json",
-                    success: function (response) {
-                        // Response berhasil, pindah ke halaman home.html dengan data sebagai parameter query
-                        window.location.href = "home.html?data=" + encodeURIComponent(JSON.stringify(response.data));
-                    },
-                    error: function (error) {
-                        // Response gagal, tampilkan pesan error
-                        console.error("Error:", error.responseJSON);
-                    }
-                });
-            });
-        });
-    </script>
+    <script src="https://cdn.jsdelivr.net/npm/@popperjs/core@2.11.6/dist/umd/popper.min.js"></script>    
+    <script>        
+        function navigateToRegister() {
+            window.location.href = "register.html";            
+        }
+    </script>    
 </body>
 </html>

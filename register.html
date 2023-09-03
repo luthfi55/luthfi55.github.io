@@ -6,6 +6,7 @@
     <title>Register</title>
     <link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/4.5.2/css/bootstrap.min.css">
     <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
+    <script src="js/register.js"></script>
 </head>
 <body class="bg-light">
     <div class="container mt-5">
@@ -14,6 +15,9 @@
                 <div class="card">
                     <div class="card-header bg-white text-center">
                         <h4>Register</h4>
+                    </div>
+                    <div class="alert alert-danger" role="alert" id="errorAlert" style="display: none;">
+                        <!-- Pesan error akan ditampilkan di sini -->
                     </div>
                     <div class="card-body">
                         <form id="registerForm">
@@ -38,37 +42,6 @@
     </div>
 
     <script src="https://cdn.jsdelivr.net/npm/@popperjs/core@2.11.6/dist/umd/popper.min.js"></script>
-    <script src="https://maxcdn.bootstrapcdn.com/bootstrap/4.5.2/js/bootstrap.min.js"></script>
-    <script>
-        $(document).ready(function () {
-            $("#registerForm").submit(function (event) {
-                event.preventDefault();
-                
-                const username = $("#username").val();
-                const email = $("#email").val();
-                const password = $("#password").val();
-                const data = {
-                    username: username,
-                    email: email,
-                    password: password
-                };
-    
-                $.ajax({
-                    type: "POST",
-                    url: "https://realtime-chat-production-e31d.up.railway.app/users/v1/register",
-                    data: JSON.stringify(data),
-                    contentType: "application/json",
-                    success: function (response) {
-                        // Response berhasil, pindah ke halaman home.html dengan data sebagai parameter query
-                        window.location.href = "index.html";
-                    },
-                    error: function (error) {
-                        // Response gagal, tampilkan pesan error
-                        console.error("Error:", error.responseJSON);
-                    }
-                });
-            });
-        });
-    </script>
+    <script src="https://maxcdn.bootstrapcdn.com/bootstrap/4.5.2/js/bootstrap.min.js"></script>    
 </body>
 </html>

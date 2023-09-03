@@ -10,34 +10,40 @@
         #roomsList {
             overflow-y: auto;
             max-height: 300px;
-        }
-        .room-id {
-            background-color: #f5f5f5;
-            padding: 5px;
-            margin-bottom: 5px;
-            border-radius: 5px;
+        }        
+        .roomId {
+            background-color: #343a40;
+            padding: 20px;
+            padding-top: 10px;
+            padding-bottom: 10px;
+            margin-bottom: 10px;     
+            border-radius: 2px;       
+            color: white;
         }
         .chat-message {
             margin-bottom: 5px;
         }
+        /* CSS stylesheet */
+        .message-username {
+            font-weight: bold;   
+            font-size: large;         
+        }
+
+        .message-content {
+            font-size: 16px;
+        }
+
     </style>
 </head>
 <body class="bg-light">
-    <div class="container mt-5">
-        <div class="row">
-            <div class="col-md-3">
-                <div class="card">
-                    <div class="card-header bg-dark text-white">
-                        Rooms Id
-                    </div>
-                    <div class="card-body p-0"  id="roomsList">
-                        <!-- List of room IDs will be displayed here -->
-                    </div>
+    <div class="container-fluid">
+        <div class="row justify-content-center mt-5"> <!-- Center the content -->
+            <div class="col-md-4">
+                <div class="roomId"  id="roomsList">
+                    <!-- List of room IDs will be displayed here -->
                 </div>
-            </div>
-            <div class="col-md-9">
                 <div class="card">
-                    <div class="card-header bg-dark text-white">
+                    <div class="card-header bg-dark text-white">                                                                        
                         Chat Room
                     </div>
                     <div class="card-body p-3" id="chatContainer">
@@ -46,9 +52,10 @@
                     <div class="card-footer">
                         <form id="chatForm">
                             <div class="input-group">
+                                <p style="padding-right: 10px; margin-top: 8px;" id=""></p>                                
                                 <input type="text" class="form-control" id="messageInput" placeholder="Type your message...">
                                 <div class="input-group-append">
-                                    <button type="submit" class="btn btn-dark">Send</button>
+                                    <button type="submit" class="btn btn-dark" style="height: 38px;">Send</button>
                                 </div>
                             </div>
                         </form>
@@ -62,40 +69,46 @@
     <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
     <script src="https://maxcdn.bootstrapcdn.com/bootstrap/4.5.2/js/bootstrap.min.js"></script>
     <script>
-        let roomIdDisplayed = true; // Variable to track whether room ID is displayed or not
+        const authToken = localStorage.getItem("authToken");        
+        if (!authToken) {
+            window.location.href = "index.html";
+        }
+
+        let roomIdDisplayed = true; // Variable to track whether room ID is displayed or not                
         // Get the WebSocket URL from the URL parameter
         const urlParams = new URLSearchParams(window.location.search);
         const encodedRoomchatURL = urlParams.get("roomchat");
-        const roomchatURL = decodeURIComponent(encodedRoomchatURL);
-
+        const roomchatURL = decodeURIComponent(encodedRoomchatURL);        
+    
         // Create WebSocket connection
         const socket = new WebSocket(roomchatURL);
-
+    
         // Handle WebSocket events
         socket.addEventListener('open', () => {
             console.log('WebSocket connection opened.');
         });
-
-        // socket.addEventListener('message', (event) => {
-        //     const receivedMessage = event.data;
-        //     displayMessage(receivedMessage);
-        //     displayId(receivedMessage);
-        // });        
-
-        socket.addEventListener('message', (event) => {
+    
+        socket.addEventListener('message', (event) => {            
             const receivedMessage = event.data;            
-            // Display other messages
-            displayMessage(receivedMessage);
-            if (roomIdDisplayed) { // Display room ID only if it's not displayed yet
-                displayId(receivedMessage);
-                roomIdDisplayed = false;
-            }            
-        });
+                        
+            const urlParams = new URLSearchParams(window.location.search);
+            const encodedData = urlParams.get("roomchat");
 
+            // Parse the URL to extract the username query parameter
+            const url = new URL(encodedData);
+            const username = url.searchParams.get("username");            
+
+            displayMessage(receivedMessage, username);
+            if (roomIdDisplayed) {
+                displayId(receivedMessage);
+                roomIdDisplayed = false;                
+            }
+        });
+    
         socket.addEventListener('error', (error) => {
             console.error('WebSocket error:', error);
         });
-
+    
         // Handle form submission to send a message
         document.getElementById('chatForm').addEventListener('submit', (event) => {
             event.preventDefault();
@@ -104,37 +117,54 @@
             socket.send(message);
             messageInput.value = ''; // Clear the input field
         });
-
-         // Function to display room IDs in the list
-         function displayId(messageData) {
+    
+        // Function to display room IDs in the list
+        function displayId(messageData) {
             const roomsList = document.getElementById('roomsList');
             const messageElement = document.createElement('div');
             messageElement.className = 'room-id';
-            
+    
             // Parse the JSON message data
             const message = JSON.parse(messageData);
-            
+    
             // Create a formatted message
-            const formattedMessage = `Room ID: ${message.roomId}`;
-            
+            // const formattedMessage = `[ Username: ${message.username} ]  [ Room ID: ${message.roomId} ]`;
+            const formattedMessage = `[ Room ID: ${message.roomId} ]`;
+    
             messageElement.textContent = formattedMessage;
             roomsList.appendChild(messageElement);
         }
-
-        function displayMessage(messageData) {
+    
+        function displayMessage(messageData, usernameData) {
             const chatContainer = document.getElementById('chatContainer');
             const messageElement = document.createElement('div');
             messageElement.className = 'chat-message';
-            
+    
             // Parse the JSON message data
             const message = JSON.parse(messageData);
-            
-            // Create a formatted message
-            const formattedMessage = `${message.username} : ${message.content}`;
-            
-            messageElement.textContent = formattedMessage;
-            chatContainer.appendChild(messageElement);
+    
+            // Create elements for username and content
+            const usernameSpan = document.createElement('span');
+            usernameSpan.className = 'message-username';            
+            if (usernameData == message.username){
+                message.username = "You";
+            }
+            usernameSpan.textContent = message.username;
+
+            const contentSpan = document.createElement('span');
+            contentSpan.className = 'message-content';
+            contentSpan.textContent = message.content;
+
+            const lineBreak = document.createElement('br');
+
+            // Append the elements to the message container
+            messageElement.appendChild(usernameSpan);
+            // messageElement.appendChild(document.createTextNode(' : ')); // Add the colon separator
+            messageElement.appendChild(lineBreak); // Add the line break
+            messageElement.appendChild(contentSpan);            
+            chatContainer.appendChild(messageElement);                             
         }
     </script>
+    
 </body>
 </html>
